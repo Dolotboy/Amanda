@@ -8,18 +8,20 @@ using JsonSerializer = System.Text.Json.JsonSerializer;
 
 public class Tokenizer
 {
-    private Dictionary<int, List<string>> tokenDictionary;
     private Dictionary<string, int> wordsIndex;
+    private List<int[]> sequencesIndex = new List<int[]>();
 
     private int sequenceLength = 100;
-    string[] wordsIndexPath = { @"c:\Amanda" };
-    string wordIndexFileName = "wordsIndex";
-    string wordIndexFileExtension = ".json";
+    string[] amandaPath = { @"c:\Amanda" };
+    string wordsIndexFileName = "wordsIndex";
+    string sequencesIndexFileName = "sequencesIndex";
+    string indexFileExtension = ".json";
 
     public Tokenizer()
     {
         // Initialisez les dictionnaires à partir des données sauvegardées ou créez de nouveaux dictionnaires vides
         wordsIndex = LoadWordsIndex() ?? new Dictionary<string, int>();
+        sequencesIndex = LoadSequencesIndex() ?? new List<int[]>();
     }
 
     public List<string> Tokenize(List<string> inputs)
@@ -42,7 +44,7 @@ public class Tokenizer
             }
         }
 
-        // Sauvegardez les dictionnaires
+        // Sauvegardez le dictionnaire
         SaveWordsIndex(wordsIndex);
 
         // Retournez la liste de tokens
@@ -51,9 +53,7 @@ public class Tokenizer
 
     public List<int[]> CreateTextSequences(List<string> sentences)
     {
-        // Crée des séquences de texte à partir des tokens avec un rembourrage jusqu'à la longueur spécifiée
         List<int[]> sequences = new List<int[]>();
-
         foreach (var sentence in sentences)
         {
             string[] words = sentence.Split(new[] { ' ', ',', '.', '!', '?' }, StringSplitOptions.RemoveEmptyEntries);
@@ -83,8 +83,15 @@ public class Tokenizer
                 }
             }
 
+            // If not, add the sequence to the list
             sequences.Add(sequence);
+            if (!sequencesIndex.Any(existingSequence => existingSequence.SequenceEqual(sequence)))
+            {
+                sequencesIndex.Add(sequence);
+            }
         }
+
+        SaveSequencesIndex(sequencesIndex);
 
         return sequences;
     }
@@ -97,7 +104,7 @@ public class Tokenizer
 
     private void SaveWordsIndex(Dictionary<string, int> data)
     {
-        string wordsIndexFullPath = Path.Combine(wordsIndexPath);
+        string wordsIndexFullPath = Path.Combine(amandaPath);
         try
         {
             if (!Directory.Exists(wordsIndexFullPath))
@@ -111,19 +118,19 @@ public class Tokenizer
             Console.WriteLine(ioex.Message);
         }
 
-        string wordIndexFileFullPath = Path.Combine(wordsIndexFullPath, Path.GetFileName(wordIndexFileName + wordIndexFileExtension));
+        string wordsIndexFileFullPath = Path.Combine(wordsIndexFullPath, Path.GetFileName(wordsIndexFileName + indexFileExtension));
 
-        File.WriteAllText(wordIndexFileFullPath, JsonSerializer.Serialize(data));
+        File.WriteAllText(wordsIndexFileFullPath, JsonSerializer.Serialize(data));
     }
 
     private Dictionary<string, int> LoadWordsIndex()
     {
-        string wordsIndexFullPath = Path.Combine(wordsIndexPath);
-        string wordIndexFileFullPath = Path.Combine(wordsIndexFullPath, Path.GetFileName(wordIndexFileName + wordIndexFileExtension));
+        string wordsIndexFullPath = Path.Combine(amandaPath);
+        string wordsIndexFileFullPath = Path.Combine(wordsIndexFullPath, Path.GetFileName(wordsIndexFileName + indexFileExtension));
 
-        if (File.Exists(wordIndexFileFullPath))
+        if (File.Exists(wordsIndexFileFullPath))
         {
-            string json = File.ReadAllText(wordIndexFileFullPath);
+            string json = File.ReadAllText(wordsIndexFileFullPath);
             wordsIndex = JsonConvert.DeserializeObject<Dictionary<string, int>>(json);
         }
         else
@@ -132,5 +139,44 @@ public class Tokenizer
         }
 
         return wordsIndex;
+    }
+
+    private void SaveSequencesIndex(List<int[]> data)
+    {
+        string sequencesIndexFullPath = Path.Combine(amandaPath);
+        try
+        {
+            if (!Directory.Exists(sequencesIndexFullPath))
+            {
+                // Try to create the directory.
+                DirectoryInfo di = Directory.CreateDirectory(sequencesIndexFullPath);
+            }
+        }
+        catch (IOException ioex)
+        {
+            Console.WriteLine(ioex.Message);
+        }
+
+        string sequencesIndexFileFullPath = Path.Combine(sequencesIndexFullPath, Path.GetFileName(sequencesIndexFileName + indexFileExtension));
+
+        File.WriteAllText(sequencesIndexFileFullPath, JsonSerializer.Serialize(data));
+    }
+
+    private List<int[]> LoadSequencesIndex()
+    {
+        string sequencesIndexFullPath = Path.Combine(amandaPath);
+        string sequencesIndexFileFullPath = Path.Combine(sequencesIndexFullPath, Path.GetFileName(sequencesIndexFileName + indexFileExtension));
+
+        if (File.Exists(sequencesIndexFileFullPath))
+        {
+            string json = File.ReadAllText(sequencesIndexFileFullPath);
+            sequencesIndex = JsonConvert.DeserializeObject<List<int[]>>(json);
+        }
+        else
+        {
+            sequencesIndex = new List<int[]>();
+        }
+
+        return sequencesIndex;
     }
 }
