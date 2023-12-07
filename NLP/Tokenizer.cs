@@ -24,6 +24,32 @@ public class Tokenizer
         sequencesIndex = LoadSequencesIndex() ?? new List<int[]>();
     }
 
+    public void LearnWordsFromStringList(List<string> words)
+    {
+        foreach (string word in words)
+        {
+            Tokenize(new List<string> { word });
+        }
+    }
+
+    public void LearnWordsFromJsonFile(string path)
+    {
+        if (File.Exists(path))
+        {
+            string json = File.ReadAllText(path);
+            List<string> words = JsonConvert.DeserializeObject<List<string>>(json);
+
+            foreach (string word in words)
+            {
+                Tokenize(new List<string> { word });
+            }
+        }
+        else
+        {
+            Console.WriteLine("Error, file doesn't exist");
+        }
+    }
+
     public List<string> Tokenize(List<string> inputs)
     {
         foreach (var input in inputs)
@@ -51,7 +77,7 @@ public class Tokenizer
         return inputs.SelectMany(input => input.Split(new[] { ' ', ',', '.', '!', '?' }, StringSplitOptions.RemoveEmptyEntries).Select(word => word.ToLower())).ToList();
     }
 
-    public List<int[]> CreateTextSequences(List<string> sentences)
+    public List<int[]> CreateTextSequences(List<string> sentences, bool learn)
     {
         List<int[]> sequences = new List<int[]>();
         foreach (var sentence in sentences)
@@ -67,7 +93,7 @@ public class Tokenizer
                     string word = words[i].ToLower();
 
                     // Ajouter le mot à l'index s'il n'est pas déjà présent
-                    if (!wordsIndex.ContainsKey(word))
+                    if (learn && !wordsIndex.ContainsKey(word))
                     {
                         Tokenize(new List<string> { word });
                         //wordsIndex[word] = wordsIndex.Count + 1; // Index commence à 1, 0 peut être utilisé pour les mots non présents dans l'index

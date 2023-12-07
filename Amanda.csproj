@@ -15,4 +15,8 @@
     <PackageReference Include="Microsoft.CognitiveServices.Speech" Version="1.18.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Trainings\" />
+  </ItemGroup>
+
 </Project>

@@ -13,7 +13,14 @@ userInput = "Search whales";
 Bot.execute(intentRecognizer.RecognizeIntent(userInput));
 */
 
+
 Tokenizer tokenizer = new Tokenizer();
+/*
+tokenizer.LearnWordsFromJsonFile(@"E:\Programmation\Apps\Amanda\Trainings\words1.json");
+tokenizer.LearnWordsFromJsonFile(@"E:\Programmation\Apps\Amanda\Trainings\words2.json");
+tokenizer.LearnWordsFromJsonFile(@"E:\Programmation\Apps\Amanda\Trainings\words3.json");
+tokenizer.LearnWordsFromJsonFile(@"E:\Programmation\Apps\Amanda\Trainings\words4.json");
+*/
 
 List<string> sentences = new List<string>
         {
@@ -24,7 +31,7 @@ List<string> sentences = new List<string>
             "Coding is an art"
         };
 
-List<int[]> sequences = tokenizer.CreateTextSequences(sentences);
+List<int[]> sequences = tokenizer.CreateTextSequences(sentences, false);
 
 Console.WriteLine("Words Index:");
 foreach (var entry in tokenizer.GetWordsIndex())
@@ -37,3 +44,4 @@ foreach (var sequence in sequences)
 {
     Console.WriteLine(string.Join(", ", sequence));
 }
+
