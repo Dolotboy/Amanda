@@ -24,9 +24,7 @@ List<string> sentences = new List<string>
             "Coding is an art"
         };
 
-int sequenceLength = 10;
-
-List<int[]> sequences = tokenizer.CreateTextSequences(sentences, sequenceLength);
+List<int[]> sequences = tokenizer.CreateTextSequences(sentences);
 
 Console.WriteLine("Words Index:");
 foreach (var entry in tokenizer.GetWordsIndex())

@@ -1,17 +1,24 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.Json;
+using JsonSerializer = System.Text.Json.JsonSerializer;
 
 public class Tokenizer
 {
     private Dictionary<int, List<string>> tokenDictionary;
     private Dictionary<string, int> wordsIndex;
 
+    private int sequenceLength = 100;
+    string[] wordsIndexPath = { @"c:\Amanda" };
+    string wordIndexFileName = "wordsIndex";
+    string wordIndexFileExtension = ".json";
+
     public Tokenizer()
     {
         // Initialisez les dictionnaires à partir des données sauvegardées ou créez de nouveaux dictionnaires vides
-        tokenDictionary = LoadTokenDictionary() ?? new Dictionary<int, List<string>>();
         wordsIndex = LoadWordsIndex() ?? new Dictionary<string, int>();
     }
 
@@ -32,26 +39,17 @@ public class Tokenizer
                 {
                     wordsIndex[word] = wordsIndex.Count + 1; // Index commence à 1, 0 peut être utilisé pour les mots non présents dans l'index
                 }
-
-                // Ajouter l'index du mot au dictionnaire des tokens
-                if (!tokenDictionary.ContainsKey(i))
-                {
-                    tokenDictionary[i] = new List<string>();
-                }
-
-                tokenDictionary[i].Add(word);
             }
         }
 
         // Sauvegardez les dictionnaires
-        SaveTokenDictionary(tokenDictionary);
         SaveWordsIndex(wordsIndex);
 
         // Retournez la liste de tokens
         return inputs.SelectMany(input => input.Split(new[] { ' ', ',', '.', '!', '?' }, StringSplitOptions.RemoveEmptyEntries).Select(word => word.ToLower())).ToList();
     }
 
-    public List<int[]> CreateTextSequences(List<string> sentences, int sequenceLength)
+    public List<int[]> CreateTextSequences(List<string> sentences)
     {
         // Crée des séquences de texte à partir des tokens avec un rembourrage jusqu'à la longueur spécifiée
         List<int[]> sequences = new List<int[]>();
@@ -71,7 +69,8 @@ public class Tokenizer
                     // Ajouter le mot à l'index s'il n'est pas déjà présent
                     if (!wordsIndex.ContainsKey(word))
                     {
-                        wordsIndex[word] = wordsIndex.Count + 1; // Index commence à 1, 0 peut être utilisé pour les mots non présents dans l'index
+                        Tokenize(new List<string> { word });
+                        //wordsIndex[word] = wordsIndex.Count + 1; // Index commence à 1, 0 peut être utilisé pour les mots non présents dans l'index
                     }
 
                     int index = wordsIndex[word];
@@ -96,51 +95,42 @@ public class Tokenizer
         return wordsIndex;
     }
 
-    private Dictionary<int, List<string>> LoadTokenDictionary()
+    private void SaveWordsIndex(Dictionary<string, int> data)
     {
-        // Implémentez la logique pour charger le dictionnaire de tokens depuis le stockage persistant (fichier, base de données, etc.)
-        // Retournez null s'il n'y a pas de données sauvegardées
-        // Exemple : return LoadDataFromFile<Dictionary<int, List<string>>>("tokenDictionary.json");
-        return null;
-    }
+        string wordsIndexFullPath = Path.Combine(wordsIndexPath);
+        try
+        {
+            if (!Directory.Exists(wordsIndexFullPath))
+            {
+                // Try to create the directory.
+                DirectoryInfo di = Directory.CreateDirectory(wordsIndexFullPath);
+            }
+        }
+        catch (IOException ioex)
+        {
+            Console.WriteLine(ioex.Message);
+        }
 
-    private void SaveTokenDictionary(Dictionary<int, List<string>> data)
-    {
-        // Implémentez la logique pour sauvegarder le dictionnaire de tokens dans le stockage persistant
-        // Exemple : SaveDataToFile("tokenDictionary.json", data);
+        string wordIndexFileFullPath = Path.Combine(wordsIndexFullPath, Path.GetFileName(wordIndexFileName + wordIndexFileExtension));
+
+        File.WriteAllText(wordIndexFileFullPath, JsonSerializer.Serialize(data));
     }
 
     private Dictionary<string, int> LoadWordsIndex()
     {
-        // Implémentez la logique pour charger l'index des mots depuis le stockage persistant
-        // Retournez null s'il n'y a pas de données sauvegardées
-        // Exemple : return LoadDataFromFile<Dictionary<string, int>>("wordsIndex.json");
-        return null;
+        string wordsIndexFullPath = Path.Combine(wordsIndexPath);
+        string wordIndexFileFullPath = Path.Combine(wordsIndexFullPath, Path.GetFileName(wordIndexFileName + wordIndexFileExtension));
+
+        if (File.Exists(wordIndexFileFullPath))
+        {
+            string json = File.ReadAllText(wordIndexFileFullPath);
+            wordsIndex = JsonConvert.DeserializeObject<Dictionary<string, int>>(json);
+        }
+        else
+        {
+            wordsIndex = new Dictionary<string, int>();
+        }
+
+        return wordsIndex;
     }
-
-    private void SaveWordsIndex(Dictionary<string, int> data)
-    {
-        // Implémentez la logique pour sauvegarder l'index des mots dans le stockage persistant
-        // Exemple : SaveDataToFile("wordsIndex.json", data);
-    }
-
-    // Ajoutez d'autres méthodes de chargement et de sauvegarde si nécessaire
-
-    // Exemple générique de méthode de chargement depuis un fichier
-    // private T LoadDataFromFile<T>(string filePath)
-    // {
-    //     if (File.Exists(filePath))
-    //     {
-    //         string json = File.ReadAllText(filePath);
-    //         return JsonConvert.DeserializeObject<T>(json);
-    //     }
-    //     return default(T);
-    // }
-
-    // Exemple générique de méthode de sauvegarde dans un fichier
-    // private void SaveDataToFile<T>(string filePath, T data)
-    // {
-    //     string json = JsonConvert.SerializeObject(data);
-    //     File.WriteAllText(filePath, json);
-    // }
 }
