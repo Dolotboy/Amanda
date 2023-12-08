@@ -15,6 +15,7 @@ Bot.execute(intentRecognizer.RecognizeIntent(userInput));
 
 
 Tokenizer tokenizer = new Tokenizer();
+trainAI();
 /*
 tokenizer.LearnWordsFromJsonFile(@"E:\Programmation\Apps\Amanda\Trainings\words1.json");
 tokenizer.LearnWordsFromJsonFile(@"E:\Programmation\Apps\Amanda\Trainings\words2.json");
@@ -22,9 +23,11 @@ tokenizer.LearnWordsFromJsonFile(@"E:\Programmation\Apps\Amanda\Trainings\words3
 tokenizer.LearnWordsFromJsonFile(@"E:\Programmation\Apps\Amanda\Trainings\words4.json");
 */
 
+/*
 List<string> sentences = new List<string>
         {
-            "I love programming",
+            "I love bazooka",
+            "I love programming with hoodies",
             "Natural Language Processing is fascinating",
             "Hello, how are you?",
             "The quick brown fox jumps over the lazy dog",
@@ -44,4 +47,13 @@ foreach (var sequence in sequences)
 {
     Console.WriteLine(string.Join(", ", sequence));
 }
-
+*/
+void trainAI()
+{
+    tokenizer.LearnWordsFromJsonFile(@"E:\Programmation\Apps\Amanda\Trainings\words1.json");
+    tokenizer.LearnWordsFromJsonFile(@"E:\Programmation\Apps\Amanda\Trainings\words2.json");
+    tokenizer.LearnWordsFromJsonFile(@"E:\Programmation\Apps\Amanda\Trainings\words3.json");
+    tokenizer.LearnWordsFromJsonFile(@"E:\Programmation\Apps\Amanda\Trainings\words4.json");
+    tokenizer.LearnSentencesWithIntentFromJson(@"E:\Programmation\Apps\Amanda\Trainings\PlayMusicIntents.json", IntentType.PlayMusic);
+    tokenizer.LearnSentencesWithIntentFromJson(@"E:\Programmation\Apps\Amanda\Trainings\OpenApplicationIntents.json", IntentType.PlayMusic);
+}
