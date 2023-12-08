@@ -1,20 +1,22 @@
 ﻿// Example usage
 using Amanda;
 
+trainAI();
 
 var intentRecognizer = new IntentRecognizer();
 
 string userInput = "";
 
-//userInput = "Please play my favorite song which is old town road";
+userInput = "Please play my favorite song which is old town road";
 //userInput = "Please open streamlabs";
-userInput = "Search whales";
+//userInput = "Search whales";
 
 Bot.execute(intentRecognizer.RecognizeIntent(userInput));
 
 
 void trainAI()
 {
+    Tokenizer tokenizer = new Tokenizer();
     tokenizer.LearnWordsFromJsonFile(@"E:\Programmation\Apps\Amanda\Trainings\words1.json");
     tokenizer.LearnWordsFromJsonFile(@"E:\Programmation\Apps\Amanda\Trainings\words2.json");
     tokenizer.LearnWordsFromJsonFile(@"E:\Programmation\Apps\Amanda\Trainings\words3.json");
@@ -23,4 +25,5 @@ void trainAI()
     tokenizer.LearnSentencesWithIntentFromJson(@"E:\Programmation\Apps\Amanda\Trainings\PlayMusicIntents.json", IntentType.PlayMusic);
     tokenizer.LearnSentencesWithIntentFromJson(@"E:\Programmation\Apps\Amanda\Trainings\PlayMovieIntents.json", IntentType.PlayMovie);
     tokenizer.LearnSentencesWithIntentFromJson(@"E:\Programmation\Apps\Amanda\Trainings\SearchIntents.json", IntentType.Search);
+    // https://raw.githubusercontent.com/dwyl/english-words/master/words_dictionary.json
 }

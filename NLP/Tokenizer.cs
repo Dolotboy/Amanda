@@ -9,9 +9,9 @@ using JsonSerializer = System.Text.Json.JsonSerializer;
 
 public class Tokenizer
 {
-    private Dictionary<string, int> wordsIndex;
-    private List<int[]> sequencesIndex = new List<int[]>();
-    private Dictionary<string, IntentType> sequencesIntentsIndex;
+    public Dictionary<string, int> wordsIndex { get; private set; }
+    public List<int[]> sequencesIndex = new List<int[]>();
+    public Dictionary<string, IntentType> sequencesIntentsIndex { get; private set; }
 
     private int sequenceLength = 100;
     string[] amandaPath = { @"c:\Amanda" };
@@ -144,7 +144,7 @@ public class Tokenizer
 
             // If not, add the sequence to the list
             sequences.Add(sequence);
-            if (!sequencesIndex.Any(existingSequence => existingSequence.SequenceEqual(sequence)))
+            if (learn && !sequencesIndex.Any(existingSequence => existingSequence.SequenceEqual(sequence)))
             {
                 sequencesIndex.Add(sequence);
             }
@@ -155,10 +155,37 @@ public class Tokenizer
         return sequences;
     }
 
+    public string SequenceToText(int[] sequence)
+    {
+        // Inversez le dictionnaire wordsIndex pour obtenir un dictionnaire d'index vers mot
+        var reverseWordsIndex = wordsIndex.ToDictionary(pair => pair.Value, pair => pair.Key);
+
+        // Créez une liste de mots à partir de la séquence d'indices
+        var wordsList = sequence
+            .Where(index => index != 0)  // Ignorez les indices zéro (padding)
+            .Select(index => reverseWordsIndex.ContainsKey(index) ? reverseWordsIndex[index] : "OOV")
+            .ToList();
+
+        // Joignez les mots pour former la phrase
+        var sentence = string.Join(" ", wordsList);
+
+        return sentence;
+    }
+
     public Dictionary<string, int> GetWordsIndex()
     {
         // Retourne l'index des mots
         return wordsIndex;
+    }
+
+    public List<int[]> GetSequencesIndex()
+    {
+        return sequencesIndex;
+    }
+
+    public Dictionary<string, IntentType> GetSequencesIntentsIndex()
+    {
+        return sequencesIntentsIndex;
     }
 
     private void SaveWordsIndex(Dictionary<string, int> data)

@@ -9,99 +9,102 @@ namespace Amanda
     {
         private readonly Dictionary<string, IntentType> intentKeywords;
         private readonly List<Application> installedApplications = new List<Application>();
+        private readonly Tokenizer tokenizer;  // Ajout de la référence à Tokenizer
 
         private Intent intent;
 
         public IntentRecognizer()
         {
-            // Définissez vos mots clés d'intention et les intentions associées
-            intentKeywords = new Dictionary<string, IntentType>
-            {
-                { "open", IntentType.OpenApplication },
-                { "play music", IntentType.PlayMusic },
-                { "play song", IntentType.PlayMusic },
-                { "play movie", IntentType.PlayMovie },
-                { "search", IntentType.Search }, // Assurez-vous que le nom correspond à votre énumération
-                // Ajoutez d'autres mots clés au besoin
-            };
-
-            // Récupérez la liste des applications installées avec leurs informations
             installedApplications = ApplicationExtractor.GetInstalledApplications();
             installedApplications = installedApplications.OrderBy(app => app.Name).ToList();
+
+            // Initialisation de l'instance de Tokenizer
+            tokenizer = new Tokenizer();
         }
+
+        // ...
 
         public Intent RecognizeIntent(string userInput)
         {
-            // Convertissez l'entrée utilisateur en minuscules pour une correspondance insensible à la casse
-            userInput = userInput.ToLower();
+            // Utilisation de Tokenizer pour obtenir les séquences de tokens
+            var sequences = tokenizer.CreateTextSequences(new List<string> { userInput }, false); // Utilisation de la fonction pour charger les séquences sans apprentissage
 
-            // Vérifiez chaque mot clé d'intention dans l'entrée utilisateur
-            foreach (var keyword in intentKeywords.Keys)
+            // Calcul du taux de ressemblance pour chaque séquence
+            var matchingSequences = sequences
+                .Select(seq => new
+                {
+                    Sequence = seq,
+                    MatchPercentage = CalculateSequenceMatchPercentage(seq)
+                })
+                .OrderByDescending(match => match.MatchPercentage)
+                .ToList();
+
+            // Obtention de la séquence avec le taux de ressemblance le plus élevé
+            var bestMatchSequence = matchingSequences.FirstOrDefault();
+
+            if (bestMatchSequence != null)
             {
-                // Vérifiez si chaque mot-clé d'intention est présent dans l'ordre spécifié
-                bool allKeywordsPresent = true;
-                int currentIndex = 0;
+                string bestMatchText = tokenizer.SequenceToText(bestMatchSequence.Sequence);
 
-                foreach (var word in keyword.Split(' '))
+                // Obtention de l'intent à partir de la séquence
+                //intent = new Intent(userInput, tokenizer.sequencesIntentsIndex[bestMatchSequence.Sequence]);
+                intent = new Intent(userInput, IntentType.OpenApplication);
+
+                /*
+                switch (sequencesIntentsIndex[bestMatchSequence.Sequence])
                 {
-                    currentIndex = userInput.IndexOf(word, currentIndex);
-
-                    if (currentIndex == -1)
-                    {
-                        allKeywordsPresent = false;
+                    case IntentType.OpenApplication:
+                        intent.application = ExtractApplication(userInput);
                         break;
-                    }
+                    case IntentType.PlayMusic:
+                        intent.concernedObject = ExtractConcernedObject(intent);
+                        break;
+                    case IntentType.PlayMovie:
+                        intent.concernedObject = ExtractConcernedObject(intent);
+                        break;
+                    case IntentType.Search:
+                        intent.concernedObject = ExtractConcernedObject(intent);
+                        break;
+                }*/
 
-                    currentIndex += word.Length;
-                }
-
-                if (allKeywordsPresent)
-                {
-                    intent = new Intent(userInput, intentKeywords[keyword]);
-
-                    switch(intentKeywords[keyword])
-                    {
-                        case IntentType.OpenApplication:
-                            intent.application = ExtractApplication(userInput);
-                            break;
-                        case IntentType.PlayMusic:
-                            intent.concernedObject = ExtractConcernedObject(intent);
-                            break;
-                        case IntentType.PlayMovie:
-                            intent.concernedObject = ExtractConcernedObject(intent);
-                            break;
-                        case IntentType.Search:
-                            intent.concernedObject = ExtractConcernedObject(intent);
-                            break;
-                    }
-
-                    return intent;
-
-                }
+                return intent;
             }
 
             // Retournez une intention par défaut ou gérez l'entrée non reconnue au besoin
             return new Intent(userInput, IntentType.Unknown);
         }
 
-        public string ExtractConcernedObject(Intent intent)
+        private int CalculateSequenceMatchPercentage(int[] sequence)
         {
-            // Vérifiez si la demande contient un mot clé lié à l'objet
-            string[] objectKeywords = { "music", "movie", "search", "song" };
+            // Convertissez la séquence en un ensemble pour la similarité de Jaccard
+            var inputSet = new HashSet<int>(sequence);
 
-            foreach (var keyword in objectKeywords)
+            int bestMatchPercentage = 0;
+
+            foreach (var existingSequence in tokenizer.sequencesIndex)
             {
-                int keywordIndex = intent.userInput.IndexOf(keyword);
-                if (keywordIndex != -1)
+                // Convertissez la séquence existante en un ensemble
+                var existingSet = new HashSet<int>(existingSequence);
+
+                // Calculez l'intersection des ensembles
+                var intersection = new HashSet<int>(inputSet);
+                intersection.IntersectWith(existingSet);
+
+                // Calculez l'union des ensembles
+                var union = new HashSet<int>(inputSet);
+                union.UnionWith(existingSet);
+
+                // Calculez la similarité de Jaccard
+                int matchPercentage = (int)Math.Round((double)intersection.Count / union.Count * 100);
+
+                // Mettez à jour le meilleur pourcentage de correspondance
+                if (matchPercentage > bestMatchPercentage)
                 {
-                    // L'objet est la partie de la phrase après le mot clé
-                    string objectPhrase = intent.userInput.Substring(keywordIndex + keyword.Length).Trim();
-                    return objectPhrase;
+                    bestMatchPercentage = matchPercentage;
                 }
             }
 
-            // Ajustez le comportement par défaut selon vos besoins
-            return null;
+            return bestMatchPercentage;
         }
 
 
