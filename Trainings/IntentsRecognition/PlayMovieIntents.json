@@ -1,4 +1,7 @@
 [
+  {
+    "intent": "OpenApplication",
+	"utterances": [
     "Play movie",
     "Start film",
     "Begin movie",
@@ -9,4 +12,6 @@
     "Start a movie",
     "Begin a film",
     "Launch a movie"
+    ]
+  }
 ]

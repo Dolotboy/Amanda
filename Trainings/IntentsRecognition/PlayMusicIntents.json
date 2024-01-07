@@ -1,4 +1,7 @@
 [
+  {
+    "intent": "OpenApplication",
+	"utterances": [
 	"Play my favorite song.",
     "Start the music playlist.",
     "Could you play a track for me?",
@@ -135,4 +138,6 @@
     "Play a song that fills the heart with joy.",
     "Start the musical journey of celebration.",
     "Let's rejoice in the melodies of happiness."
+    ]
+  }
 ]

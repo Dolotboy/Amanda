@@ -11,7 +11,7 @@ public class Tokenizer
 {
     public Dictionary<string, int> wordsIndex { get; private set; }
     public List<int[]> sequencesIndex = new List<int[]>();
-    public Dictionary<string, IntentType> sequencesIntentsIndex { get; private set; }
+    public Dictionary<string, string> sequencesIntentsIndex { get; private set; }
 
     private int sequenceLength = 100;
     string[] amandaPath = { @"c:\Amanda" };
@@ -25,7 +25,7 @@ public class Tokenizer
         // Initialisez les dictionnaires à partir des données sauvegardées ou créez de nouveaux dictionnaires vides
         wordsIndex = LoadWordsIndex() ?? new Dictionary<string, int>();
         sequencesIndex = LoadSequencesIndex() ?? new List<int[]>();
-        sequencesIntentsIndex = LoadSequencesIntentsIndex() ?? new Dictionary<string, IntentType>();
+        sequencesIntentsIndex = LoadSequencesIntentsIndex() ?? new Dictionary<string, string>();
     }
 
     public void LearnWordsFromStringList(List<string> words)
@@ -81,7 +81,7 @@ public class Tokenizer
         return inputs.SelectMany(input => input.Split(new[] { ' ', ',', '.', '!', '?' }, StringSplitOptions.RemoveEmptyEntries).Select(word => word.ToLower())).ToList();
     }
 
-    public void LearnSentencesWithIntentFromJson(string path, IntentType intentType)
+    public void LearnSentencesWithIntentFromJson(string path, string intentType)
     {
         if (File.Exists(path))
         {
@@ -183,7 +183,7 @@ public class Tokenizer
         return sequencesIndex;
     }
 
-    public Dictionary<string, IntentType> GetSequencesIntentsIndex()
+    public Dictionary<string, string> GetSequencesIntentsIndex()
     {
         return sequencesIntentsIndex;
     }
@@ -266,7 +266,7 @@ public class Tokenizer
         return sequencesIndex;
     }
 
-    private void SaveSequencesIntentsIndex(Dictionary<string, IntentType> data)
+    private void SaveSequencesIntentsIndex(Dictionary<string, string> data)
     {
         string sequencesIntentsIndexFullPath = Path.Combine(amandaPath);
         try
@@ -287,7 +287,7 @@ public class Tokenizer
         File.WriteAllText(sequencesIntentsIndexFileFullPath, JsonSerializer.Serialize(data));
     }
 
-    private Dictionary<string, IntentType> LoadSequencesIntentsIndex()
+    private Dictionary<string, string> LoadSequencesIntentsIndex()
     {
         string sequencesIntentsIndexFullPath = Path.Combine(amandaPath);
         string sequencesIntentsIndexFileFullPath = Path.Combine(sequencesIntentsIndexFullPath, Path.GetFileName(sequencesIntentsIndexFileName + indexFileExtension));
@@ -295,11 +295,11 @@ public class Tokenizer
         if (File.Exists(sequencesIntentsIndexFileFullPath))
         {
             string json = File.ReadAllText(sequencesIntentsIndexFileFullPath);
-            sequencesIntentsIndex = JsonConvert.DeserializeObject<Dictionary<string, IntentType>>(json);
+            sequencesIntentsIndex = JsonConvert.DeserializeObject<Dictionary<string, string>>(json);
         }
         else
         {
-            sequencesIntentsIndex = new Dictionary<string, IntentType>();
+            sequencesIntentsIndex = new Dictionary<string, string>();
         }
 
         return sequencesIntentsIndex;

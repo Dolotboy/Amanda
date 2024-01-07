@@ -6,22 +6,14 @@ using System.Threading.Tasks;
 
 namespace Amanda
 {
-    public enum IntentType
-    {
-        OpenApplication,
-        PlayMusic,
-        PlayMovie,
-        Search,
-        Unknown
-    }
     public class Intent
     {
         public string userInput;
-        public IntentType intent;
+        public string intent;
         public Application application;
         public string site;
         public string concernedObject;
-        public Intent(string userInput, IntentType intent)
+        public Intent(string userInput, string intent)
         {
             this.userInput = userInput;
             this.intent = intent;

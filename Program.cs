@@ -21,9 +21,5 @@ void trainAI()
     tokenizer.LearnWordsFromJsonFile(@"E:\Programmation\Apps\Amanda\Trainings\words2.json");
     tokenizer.LearnWordsFromJsonFile(@"E:\Programmation\Apps\Amanda\Trainings\words3.json");
     tokenizer.LearnWordsFromJsonFile(@"E:\Programmation\Apps\Amanda\Trainings\words4.json");
-    tokenizer.LearnSentencesWithIntentFromJson(@"E:\Programmation\Apps\Amanda\Trainings\OpenApplicationIntents.json", IntentType.OpenApplication);
-    tokenizer.LearnSentencesWithIntentFromJson(@"E:\Programmation\Apps\Amanda\Trainings\PlayMusicIntents.json", IntentType.PlayMusic);
-    tokenizer.LearnSentencesWithIntentFromJson(@"E:\Programmation\Apps\Amanda\Trainings\PlayMovieIntents.json", IntentType.PlayMovie);
-    tokenizer.LearnSentencesWithIntentFromJson(@"E:\Programmation\Apps\Amanda\Trainings\SearchIntents.json", IntentType.Search);
     // https://raw.githubusercontent.com/dwyl/english-words/master/words_dictionary.json
 }

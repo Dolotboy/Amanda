@@ -1,4 +1,7 @@
 [
+  {
+    "intent": "OpenApplication",
+	"utterances": [
     "Launch the application.",
     "Open the app for me.",
     "Start the program.",
@@ -324,4 +327,6 @@
     "Bring up the app promptly.",
     "Swiftly initiate the application.",
     "Activate the app promptly."
+    ]
+  }
 ]

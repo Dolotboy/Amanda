@@ -7,7 +7,7 @@ namespace Amanda
 {
     public class IntentRecognizer
     {
-        private readonly Dictionary<string, IntentType> intentKeywords;
+        private readonly Dictionary<string, string> intentKeywords;
         private readonly List<Application> installedApplications = new List<Application>();
         private readonly Tokenizer tokenizer;  // Ajout de la référence à Tokenizer
 
@@ -21,8 +21,6 @@ namespace Amanda
             // Initialisation de l'instance de Tokenizer
             tokenizer = new Tokenizer();
         }
-
-        // ...
 
         public Intent RecognizeIntent(string userInput)
         {
@@ -48,8 +46,7 @@ namespace Amanda
 
                 // Obtention de l'intent à partir de la séquence
                 //intent = new Intent(userInput, tokenizer.sequencesIntentsIndex[bestMatchSequence.Sequence]);
-                intent = new Intent(userInput, IntentType.OpenApplication);
-
+                
                 /*
                 switch (sequencesIntentsIndex[bestMatchSequence.Sequence])
                 {
@@ -71,7 +68,7 @@ namespace Amanda
             }
 
             // Retournez une intention par défaut ou gérez l'entrée non reconnue au besoin
-            return new Intent(userInput, IntentType.Unknown);
+            return new Intent(userInput, "Unknown");
         }
 
         private int CalculateSequenceMatchPercentage(int[] sequence)
