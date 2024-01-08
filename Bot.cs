@@ -8,12 +8,21 @@ using System.Net.Http;
 using System.Net;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Microsoft.CognitiveServices.Speech.Transcription;
 
 namespace Amanda
 {
     public class Bot
     {
-        public static async void execute(string userInput)
+        public List<WitQuery> queries;
+        public WitQuery currentQuery;
+
+        public Bot()
+        {
+            queries = new List<WitQuery>();
+        }
+
+        public async void Execute(string userInput)
         {
             var url = "https://api.wit.ai/message?v=20240108&q=" + userInput;
 
@@ -26,45 +35,111 @@ namespace Amanda
             var httpResponse = (HttpWebResponse)httpRequest.GetResponse();
             using (var streamReader = new StreamReader(httpResponse.GetResponseStream()))
             {
-                var result = JsonConvert.DeserializeObject<JObject>(streamReader.ReadToEnd());
+                GetQuery(streamReader);
+            }
 
-                foreach (var intentProperty in result["intents"].Children<JProperty>())
+            Console.WriteLine(currentQuery.ToString());
+            Console.Write(httpResponse.StatusCode);
+
+            TreatCurrentQuery();
+        }
+
+        public async void GetQuery(StreamReader streamReader)
+        {
+            var result = JsonConvert.DeserializeObject<JObject>(streamReader.ReadToEnd());
+
+            currentQuery = new WitQuery(result);
+
+            var intentsArray = result["intents"] as JArray;
+            if (intentsArray != null)
+            {
+                foreach (var item in intentsArray)
                 {
-                    var intentName = intentProperty.Name; // Nom de l'entité
-                    var intentValue = intentProperty.Value; // Valeur de l'entité
+                    var intentName = item["name"];
 
-                    Console.WriteLine($"Entité : {intentName}, Valeur : {intentValue}");
-
-                    // Si la valeur est un tableau, vous pouvez le parcourir de la même manière
-                    if (intentValue is JArray entityArray)
+                    // Vérifiez si la propriété "name" existe et est une chaîne
+                    if (intentName != null && intentName.Type == JTokenType.String)
                     {
-                        foreach (var item in entityArray)
-                        {
-                            // Faire quelque chose avec chaque élément du tableau
-                        }
-                    }
-                }
-
-                foreach (var entityProperty in result["entities"].Children<JProperty>())
-                {
-                    var entityName = entityProperty.Name; // Nom de l'entité
-                    var entityValue = entityProperty.Value; // Valeur de l'entité
-
-                    Console.WriteLine($"Entité : {entityName}, Valeur : {entityValue}");
-
-                    // Si la valeur est un tableau, vous pouvez le parcourir de la même manière
-                    if (entityValue is JArray entityArray)
-                    {
-                        foreach (var item in entityArray)
-                        {
-                            // Faire quelque chose avec chaque élément du tableau
-                        }
+                        // Attribuez la valeur à currentQuery.intent
+                        currentQuery.intent = intentName.ToString();
                     }
                 }
             }
 
-            //Console.WriteLine(httpResponse.StatusCode);
+            foreach (var entityProperty in result["entities"].Children<JProperty>())
+            {
+                var entityName = entityProperty.Name; // Nom de l'entité
+                var entityValue = entityProperty.Value; // Valeur de l'entité
+
+                // Si la valeur est un tableau, vous pouvez le parcourir de la même manière
+                if (entityValue is JArray entityArray)
+                {
+                    foreach (var item in entityArray)
+                    {
+                        currentQuery.entities.Add(new WitEntity(Convert.ToString(item["value"]), entityName));
+                    }
+                }
+            }
+
+            queries.Add(currentQuery);
+        }
+    
+        private async void TreatCurrentQuery()
+        {
+            switch(currentQuery.intent)
+            {
+                case "play":
+                    TreatPlayIntent();
+                    break;
+                case "play_music":
+                    TreatPlayIntent();
+                    break;
+                case "play_movie":
+                    TreatPlayIntent();
+                    break;
+                case "play_video":
+                    TreatPlayIntent();
+                    break;
+                case "play_last_video":
+                    TreatPlayIntent();
+                    break;
+                case "play_site":
+                    TreatPlayIntent();
+                    break;
+                case "update":
+                    Update();
+                    break;
+                case "update_computer":
+                    Update();
+                    break;
+            }
         }
 
+        private async void TreatPlayIntent()
+        {
+            foreach(WitEntity entity in currentQuery.entities)
+            {
+                switch (entity.type)
+                {
+                    case "Applications:Applications":
+                        Console.WriteLine("Ouverture de l'application");
+                        break;
+                    case "Musics:Musics":
+                        Console.WriteLine("Lancement de la musique");
+                        break;
+                    case "Movies:Movies":
+                        Console.WriteLine("Lancement du film");
+                        break;
+                    case "Sites:Sites":
+                        Console.WriteLine("Ouverture du site");
+                        break;
+                }
+            }
+        }
+
+        private async void Update()
+        {
+
+        }
     }
 }
