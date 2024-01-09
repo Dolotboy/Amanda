@@ -47,8 +47,20 @@ namespace Amanda
                 {
                     // Obtenez le nom de l'application et le chemin de l'exécutable
                     object displayName = subKey.GetValue("DisplayName");
-                    object executablePath = subKey.GetValue("DisplayIcon") ?? subKey.GetValue("UninstallString");
-                    object uninstallPath = subKey.GetValue("DisplayIcon") ?? subKey.GetValue("UninstallString");
+                    string executablePath = GetValueFromRegistry(subKey, "DisplayIcon");
+                    if (executablePath.EndsWith(".ico") || String.IsNullOrEmpty(executablePath))
+                    {
+                        executablePath = GetValueFromRegistry(subKey, "UninstallString");
+                        if(executablePath.ToLower().Contains("uninstall"))
+                        {
+                            executablePath = "";
+                        }
+                    }
+                    string uninstallPath = GetValueFromRegistry(subKey, "DisplayIcon");
+                    if (uninstallPath.ToString().EndsWith(".ico") || String.IsNullOrEmpty(executablePath))
+                    {
+                        uninstallPath = GetValueFromRegistry(subKey, "UninstallString");
+                    }
 
                     if (displayName != null && executablePath != null)
                     {
@@ -57,7 +69,6 @@ namespace Amanda
                         string cleanedExecutePath = CleanExecutablePath(executablePath.ToString());
                         string cleanedUninstallPath = CleanExecutablePath(uninstallPath.ToString());
 
-
                         Application app = new Application(displayName.ToString(), cleanedExecutePath, cleanedUninstallPath, nicknames);
                         applications.Add(app);
                     }
@@ -65,6 +76,13 @@ namespace Amanda
             }
 
             return applications;
+        }
+
+        private static string GetValueFromRegistry(RegistryKey subKey, string property)
+        {
+            object value = subKey.GetValue(property);
+
+            return value != null ? value.ToString() : string.Empty;
         }
 
         private static List<string> GetApplicationNicknames(string displayName)

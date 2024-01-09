@@ -11,6 +11,7 @@ namespace Amanda
     {
         public JObject result;
         public string intent;
+        public string trait;
         public List<WitEntity> entities;
 
         public WitQuery(JObject result)
@@ -19,9 +20,10 @@ namespace Amanda
             entities = new List<WitEntity>();
         }
 
-        public WitQuery(JObject result, string intent, List<WitEntity> entities) : this(result)
+        public WitQuery(JObject result, string intent, string trait, List<WitEntity> entities) : this(result)
         {
             this.intent = intent;
+            this.trait = trait;
             this.entities = entities;
         }
 
@@ -32,7 +34,7 @@ namespace Amanda
             {
                 entitiesString += entity.ToString() + " ";
             }
-            return "Intent: " + this.intent + " Entities: " + entitiesString;
+            return "Intent: " + this.intent + " Trait: " + this.trait + " Entities: " + entitiesString;
         }
     }
 }

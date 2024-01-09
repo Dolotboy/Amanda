@@ -66,6 +66,27 @@ namespace Amanda
                 }
             }
 
+            var traitsObject = result["traits"] as JObject;
+            if (traitsObject != null)
+            {
+                foreach (var traitProperty in traitsObject.Properties())
+                {
+                    var traitArray = traitProperty.Value as JArray;
+
+                    if (traitArray != null && traitArray.Count > 0)
+                    {
+                        var traitValue = traitArray[0]["value"];
+
+                        // Vérifiez si la propriété "value" existe et est une chaîne
+                        if (traitValue != null && traitValue.Type == JTokenType.String)
+                        {
+                            // Attribuez la valeur à currentQuery.trait
+                            currentQuery.trait = traitValue.ToString();
+                        }
+                    }
+                }
+            }
+
             foreach (var entityProperty in result["entities"].Children<JProperty>())
             {
                 var entityName = entityProperty.Name; // Nom de l'entité
@@ -122,7 +143,14 @@ namespace Amanda
                 switch (entity.type)
                 {
                     case "Applications:Applications":
-                        OpenApp(entity.value);
+                        if(currentQuery.trait == "open")
+                        {
+                            ManageApp(entity.value, true);
+                        }
+                        else
+                        {
+                            ManageApp(entity.value, false);
+                        }
                         break;
                     case "Musics:Musics":
                         Console.WriteLine("Lancement de la musique");
@@ -137,7 +165,7 @@ namespace Amanda
             }
         }
 
-        private async void OpenApp(string appName)
+        private async void ManageApp(string appName, bool open)
         {
             List<Application> installedApplications = new List<Application>();
             installedApplications = ApplicationExtractor.GetInstalledApplications();
@@ -148,10 +176,18 @@ namespace Amanda
             Console.WriteLine("App trouvé: " + app.Name + " Chemin d'exec: " + app.ExecutablePath + " Chemin uninstall: " + app.UninstallPath);
             if (app.ExecutablePath != null)
             {
-                Console.WriteLine("Ouverture de l'application: " + app.Name);
                 try
                 {
-                    Process.Start(app.ExecutablePath);
+                    if(open)
+                    {
+                        Console.WriteLine("Ouverture de l'application: " + app.Name);
+                        Process.Start(app.ExecutablePath);
+                    }
+                    else
+                    {
+                        Console.WriteLine("Fermeture de l'application: " + app.Name);
+                        //Process.Kill();
+                    }
                 }
                 catch(Exception e)
                 {
