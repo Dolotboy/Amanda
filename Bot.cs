@@ -39,7 +39,7 @@ namespace Amanda
             }
 
             Console.WriteLine(currentQuery.ToString());
-            Console.Write(httpResponse.StatusCode);
+            Console.Write(httpResponse.StatusCode + "\n");
 
             TreatCurrentQuery();
         }
@@ -123,6 +123,7 @@ namespace Amanda
                 {
                     case "Applications:Applications":
                         Console.WriteLine("Ouverture de l'application");
+                        OpenApp(entity.value);
                         break;
                     case "Musics:Musics":
                         Console.WriteLine("Lancement de la musique");
@@ -135,6 +136,17 @@ namespace Amanda
                         break;
                 }
             }
+        }
+
+        private async void OpenApp(string appName)
+        {
+            List<Application> installedApplications = new List<Application>();
+            installedApplications = ApplicationExtractor.GetInstalledApplications();
+            installedApplications = installedApplications.OrderBy(app => app.Name).ToList();
+
+            Application app = ApplicationExtractor.ExtractApplication(installedApplications, appName);
+
+            Console.WriteLine("App trouvé: " + app.Name);
         }
 
         private async void Update()
