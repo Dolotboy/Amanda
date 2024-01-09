@@ -136,6 +136,9 @@ namespace Amanda
                 case "update_computer":
                     Update();
                     break;
+                case "current_time":
+                    TreatTime();
+                    break;
             }
         }
 
@@ -245,6 +248,22 @@ namespace Amanda
                         Console.WriteLine("Erreur : " + error.Exception.Message);
                     }
                 }
+            }
+        }
+
+        private async void TreatTime()
+        {
+            switch(currentQuery.trait)
+            {
+                case "datetime":
+                    Console.WriteLine(DateTime.Now.ToString());
+                    break;
+                case "time":
+                    Console.WriteLine(DateTime.Now.ToString("h:mm:ss tt"));
+                    break;
+                case "date":
+                    Console.WriteLine(DateOnly.FromDateTime(DateTime.Now).ToString());
+                    break;
             }
         }
     }

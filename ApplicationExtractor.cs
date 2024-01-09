@@ -150,19 +150,30 @@ namespace Amanda
 
             foreach (var word in words)
             {
-                // Vérifiez si le mot complet correspond à une partie du nom de l'application
-                if (allWords.Any(w => w.Contains(word.ToLower()) || appFullName.Contains(word.ToLower())))
+                // Vérifiez si le mot correspond exactement à l'un des noms complets ou surnoms de l'application
+                if (allWords.Contains(word.ToLower()) || appFullName.Contains(word.ToLower()))
                 {
                     // Calculez le nombre de lettres correspondantes
                     matchingLettersCount += word.Length;
 
                     // Calculez le nombre de lettres en trop
                     extraLettersCount += Math.Max(0, appFullName.Length - word.Length);
+
+                    // Bonus de 25% si le mot correspond exactement à l'un des mots du nom complet
+                    if (appFullName.Split(' ', ',', ':').Any(w => w.ToLower() == word.ToLower()))
+                    {
+                        matchingLettersCount += (int)Math.Round(word.Length * 0.50);
+                    }
                 }
             }
 
             // Ajustez le pourcentage en fonction du nombre de lettres en trop
             var adjustedMatchPercentage = (int)Math.Round((double)matchingLettersCount / (matchingLettersCount + extraLettersCount) * 100);
+
+            if (adjustedMatchPercentage < 0)
+            {
+                adjustedMatchPercentage = 0;
+            }
 
             return adjustedMatchPercentage;
         }
