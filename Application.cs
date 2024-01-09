@@ -10,6 +10,7 @@ namespace Amanda
     {
         public string Name { get; set; }
         public string ExecutablePath { get; set; }
+        public string UninstallPath { get; set; }
         public List<string> Nicknames { get; set; }
 
         public Application(string name)
@@ -17,10 +18,11 @@ namespace Amanda
             this.Name = name;
         }
 
-        public Application(string name, string executablePath, List<string> nicknames)
+        public Application(string name, string executablePath, string uninstallPath, List<string> nicknames)
         {
             Name = name;
             ExecutablePath = executablePath;
+            UninstallPath = uninstallPath;
             Nicknames = nicknames;
         }
     }

@@ -122,7 +122,6 @@ namespace Amanda
                 switch (entity.type)
                 {
                     case "Applications:Applications":
-                        Console.WriteLine("Ouverture de l'application");
                         OpenApp(entity.value);
                         break;
                     case "Musics:Musics":
@@ -146,7 +145,19 @@ namespace Amanda
 
             Application app = ApplicationExtractor.ExtractApplication(installedApplications, appName);
 
-            Console.WriteLine("App trouvé: " + app.Name);
+            Console.WriteLine("App trouvé: " + app.Name + " Chemin d'exec: " + app.ExecutablePath + " Chemin uninstall: " + app.UninstallPath);
+            if (app.ExecutablePath != null)
+            {
+                Console.WriteLine("Ouverture de l'application: " + app.Name);
+                try
+                {
+                    Process.Start(app.ExecutablePath);
+                }
+                catch(Exception e)
+                {
+                    Console.WriteLine(e);
+                }
+            }
         }
 
         private async void Update()

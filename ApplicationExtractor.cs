@@ -48,14 +48,17 @@ namespace Amanda
                     // Obtenez le nom de l'application et le chemin de l'exécutable
                     object displayName = subKey.GetValue("DisplayName");
                     object executablePath = subKey.GetValue("DisplayIcon") ?? subKey.GetValue("UninstallString");
+                    object uninstallPath = subKey.GetValue("DisplayIcon") ?? subKey.GetValue("UninstallString");
 
                     if (displayName != null && executablePath != null)
                     {
                         List<string> nicknames = GetApplicationNicknames(displayName.ToString());
 
-                        string cleanedPath = CleanExecutablePath(executablePath.ToString());
+                        string cleanedExecutePath = CleanExecutablePath(executablePath.ToString());
+                        string cleanedUninstallPath = CleanExecutablePath(uninstallPath.ToString());
 
-                        Application app = new Application(displayName.ToString(), cleanedPath, nicknames);
+
+                        Application app = new Application(displayName.ToString(), cleanedExecutePath, cleanedUninstallPath, nicknames);
                         applications.Add(app);
                     }
                 }
@@ -92,7 +95,7 @@ namespace Amanda
         public static Application ExtractApplication(List<Application> installedApplications, string targetApp)
         {
             // Divisez l'entrée utilisateur en mots
-            var inputWords = targetApp.Split(new[] { ' ', ',', '.', '!', '?' }, StringSplitOptions.RemoveEmptyEntries);
+            var inputWords = targetApp.Split(new[] { ',', '.', '!', '?' }, StringSplitOptions.RemoveEmptyEntries);
 
             // Recherchez chaque application installée dans l'entrée utilisateur
             var matchingApplications = installedApplications
@@ -109,7 +112,7 @@ namespace Amanda
 
             // Vous pouvez définir un seuil de pourcentage minimum pour considérer une correspondance
             //if (bestMatch != null && bestMatch.MatchPercentage > 50)
-            if (bestMatch != null)
+            if (bestMatch != null && bestMatch.MatchPercentage != 0)
             {
                 return bestMatch.Application;
             }
@@ -120,39 +123,30 @@ namespace Amanda
 
         public static int CalculateMatchPercentage(string[] words, Application app)
         {
-            // Convertissez le nom de l'application et ses surnoms en une seule chaîne
             var appFullName = app.Name.ToLower();
             var appNicknames = app.Nicknames.Select(n => n.ToLower());
             var allWords = new HashSet<string>(new[] { appFullName }.Concat(appNicknames));
 
-            // Initialisez le compteur de lettres correspondantes
             var matchingLettersCount = 0;
-
-            // Initialisez le compteur de sous-chaînes consécutives
-            var consecutiveSubstringCount = 0;
+            var extraLettersCount = 0;
 
             foreach (var word in words)
             {
-                var appSubstringIndex = appFullName.IndexOf(word);
-
-                while (appSubstringIndex != -1)
+                // Vérifiez si le mot complet correspond à une partie du nom de l'application
+                if (allWords.Any(w => w.Contains(word.ToLower()) || appFullName.Contains(word.ToLower())))
                 {
-                    // Incrémentez le compteur de sous-chaînes consécutives
-                    consecutiveSubstringCount++;
-
-                    // Incrémentez le compteur de lettres correspondantes
+                    // Calculez le nombre de lettres correspondantes
                     matchingLettersCount += word.Length;
 
-                    // Recherchez la prochaine occurrence de la sous-chaîne
-                    appSubstringIndex = appFullName.IndexOf(word, appSubstringIndex + 1);
+                    // Calculez le nombre de lettres en trop
+                    extraLettersCount += Math.Max(0, appFullName.Length - word.Length);
                 }
             }
 
-            // Calculez le pourcentage de correspondance en fonction des lettres correspondantes et des sous-chaînes consécutives
-            var totalCharactersCount = words.Sum(word => Math.Max(word.Length, 1)); // Utilisez Math.Max pour éviter une division par zéro
-            var matchPercentage = (int)Math.Round((double)(matchingLettersCount + consecutiveSubstringCount) / totalCharactersCount * 100);
+            // Ajustez le pourcentage en fonction du nombre de lettres en trop
+            var adjustedMatchPercentage = (int)Math.Round((double)matchingLettersCount / (matchingLettersCount + extraLettersCount) * 100);
 
-            return matchPercentage;
+            return adjustedMatchPercentage;
         }
 
     }
