@@ -13,6 +13,7 @@
     <PackageReference Include="Microsoft.Bot.Builder" Version="4.16.0" />
     <PackageReference Include="Microsoft.Bot.Builder.Integration.AspNet.Core" Version="4.16.0" />
     <PackageReference Include="Microsoft.CognitiveServices.Speech" Version="1.18.0" />
+    <PackageReference Include="Microsoft.PowerShell.5.ReferenceAssemblies" Version="1.1.0" />
   </ItemGroup>
 
   <ItemGroup>

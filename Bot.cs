@@ -9,6 +9,9 @@ using System.Net;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Microsoft.CognitiveServices.Speech.Transcription;
+using System.Collections.ObjectModel;
+using System.Xml.Linq;
+using System.Management.Automation;
 
 namespace Amanda
 {
@@ -186,7 +189,10 @@ namespace Amanda
                     else
                     {
                         Console.WriteLine("Fermeture de l'application: " + app.Name);
-                        //Process.Kill();
+                        foreach (Process process in Process.GetProcessesByName(appName))
+                        {
+                            process.Kill();
+                        }
                     }
                 }
                 catch(Exception e)
@@ -198,7 +204,48 @@ namespace Amanda
 
         private async void Update()
         {
+            // Installe le module PSWindowsUpdate
+            ExecutePowerShellCommand("Install-Module -Name PSWindowsUpdate -Force -AllowClobber");
 
+            // Obtient la liste des stratégies d'exécution
+            ExecutePowerShellCommand("Get-ExecutionPolicy -List");
+
+            // Définit la stratégie d'exécution à RemoteSigned
+            ExecutePowerShellCommand("Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned");
+
+            // Recherche et installe les mises à jour Windows avec redémarrage automatique
+            ExecutePowerShellCommand("Get-WindowsUpdate -AcceptAll -Install -AutoReboot");
+        }
+
+        private async void ExecutePowerShellCommand(string command)
+        {
+            using (PowerShell PowerShellInstance = PowerShell.Create())
+            {
+                // Utilise l'option AddScript pour ajouter la commande PowerShell
+                PowerShellInstance.AddScript(command);
+
+                // Exécute la commande
+                Collection<PSObject> PSOutput = PowerShellInstance.Invoke();
+
+                // Affiche la sortie de la commande
+                foreach (PSObject outputItem in PSOutput)
+                {
+                    if (outputItem != null)
+                    {
+                        // Affiche la sortie sous forme de chaîne
+                        Console.WriteLine(outputItem.BaseObject.ToString());
+                    }
+                }
+
+                // Affiche les erreurs, le cas échéant
+                if (PowerShellInstance.Streams.Error.Count > 0)
+                {
+                    foreach (ErrorRecord error in PowerShellInstance.Streams.Error)
+                    {
+                        Console.WriteLine("Erreur : " + error.Exception.Message);
+                    }
+                }
+            }
         }
     }
 }
