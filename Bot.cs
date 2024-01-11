@@ -41,7 +41,6 @@ namespace Amanda
                 GetQuery(streamReader);
             }
 
-            Console.WriteLine(currentQuery.ToString());
             Console.Write(httpResponse.StatusCode + "\n");
 
             TreatCurrentQuery();
@@ -110,35 +109,40 @@ namespace Amanda
     
         private async void TreatCurrentQuery()
         {
-            switch(currentQuery.intent)
+            if(currentQuery != null)
             {
-                case "play":
-                    TreatPlayIntent();
-                    break;
-                case "play_music":
-                    TreatPlayIntent();
-                    break;
-                case "play_movie":
-                    TreatPlayIntent();
-                    break;
-                case "play_video":
-                    TreatPlayIntent();
-                    break;
-                case "play_last_video":
-                    TreatPlayIntent();
-                    break;
-                case "play_site":
-                    TreatPlayIntent();
-                    break;
-                case "update":
-                    Update();
-                    break;
-                case "update_computer":
-                    Update();
-                    break;
-                case "current_time":
-                    TreatTime();
-                    break;
+                Console.WriteLine(currentQuery.ToString());
+
+                switch (currentQuery.intent)
+                {
+                    case "play":
+                        TreatPlayIntent();
+                        break;
+                    case "play_music":
+                        TreatPlayIntent();
+                        break;
+                    case "play_movie":
+                        TreatPlayIntent();
+                        break;
+                    case "play_video":
+                        TreatPlayIntent();
+                        break;
+                    case "play_last_video":
+                        TreatPlayIntent();
+                        break;
+                    case "play_site":
+                        TreatPlayIntent();
+                        break;
+                    case "update":
+                        Update();
+                        break;
+                    case "update_computer":
+                        Update();
+                        break;
+                    case "current_time":
+                        TreatTime();
+                        break;
+                }
             }
         }
 
@@ -165,7 +169,10 @@ namespace Amanda
                         Console.WriteLine("Lancement du film");
                         break;
                     case "Sites:Sites":
-                        Console.WriteLine("Ouverture du site");
+                        if(currentQuery.trait == "start" || currentQuery.trait == "open")
+                        {
+                            ManageSite(entity.value);
+                        }
                         break;
                 }
             }
@@ -201,6 +208,28 @@ namespace Amanda
                 catch(Exception e)
                 {
                     Console.WriteLine(e);
+                }
+            }
+        }
+
+        private void ManageSite(string siteName)
+        {
+            string jsonFilePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Metadata\\sites.json");
+            string jsonString = File.ReadAllText(jsonFilePath);
+
+            // Parse the JSON string
+            JObject jsonData = JObject.Parse(jsonString);
+
+            JArray sites = (JArray)jsonData["sites"];
+
+            foreach (JObject site in sites)
+            {
+                if (site["name"].ToString().ToLower().Equals(siteName.ToLower(), StringComparison.OrdinalIgnoreCase))
+                {
+                    Process myProcess = new Process();
+                    myProcess.StartInfo.UseShellExecute = true;
+                    myProcess.StartInfo.FileName = (string)site["link"];
+                    myProcess.Start();
                 }
             }
         }

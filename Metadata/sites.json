@@ -1,0 +1,137 @@
+{
+  "sites": [
+    {
+      "name": "YouTube",
+      "synonymes": [ "YT", "Tube" ],
+      "link": "https://www.youtube.com",
+      "parameters": [
+        {
+          "name": "id",
+          "prerequisite": "",
+          "description": "Go to a specific channel",
+          "urlParameter": "/watch?v=~PARAMETER~"
+        },
+        {
+          "name": "time",
+          "prerequisite": "id",
+          "description": "Choose the time to start the video at (In second)",
+          "urlParameter": "&t=~PARAMETER~s"
+        },
+        {
+          "name": "user",
+          "prerequisite": "",
+          "description": "Go to a specific channel",
+          "urlParameter": "/c/~PARAMETER~"
+        },
+        {
+          "name": "query",
+          "prerequisite": "",
+          "description": "Search for videos with the query",
+          "urlParameter": "/results?search_query=~PARAMETER~"
+        }
+      ]
+    },
+    {
+      "name": "Wikipedia",
+      "synonymes": [ "Wiki" ],
+      "link": "https://fr.wikipedia.org/wiki",
+      "parameters": [
+        {
+          "name": "id",
+          "prerequisite": "",
+          "description": "Go to a specific article",
+          "urlParameter": "/~PARAMETER~"
+        },
+        {
+          "name": "lang",
+          "prerequisite": "id",
+          "description": "Choisir la langue de l'article",
+          "urlParameter": "?lang=~PARAMETER~"
+        }
+      ]
+    },
+    {
+      "name": "Twitch",
+      "synonymes": [ "TTV" ],
+      "link": "https://www.twitch.tv",
+      "parameters": [
+        {
+          "name": "user",
+          "prerequisite": "",
+          "description": "Go to a specific channel",
+          "urlParameter": "/~PARAMETER~"
+        },
+        {
+          "name": "topic",
+          "prerequisite": "",
+          "description": "Go to a specific category",
+          "urlParameter": "/directory/game/~PARAMETER~"
+        },
+        {
+          "name": "explore",
+          "prerequisite": "",
+          "description": "Browse through categories",
+          "urlParameter": "/directory/game"
+        }
+      ]
+    },
+    {
+      "name": "Google",
+      "synonymes": [ "Search" ],
+      "link": "https://www.google.com",
+      "parameters": [
+        {
+          "name": "query",
+          "prerequisite": "",
+          "description": "Search for a query",
+          "urlParameter": "/search?q=~PARAMETER~"
+        }
+      ]
+    },
+    {
+      "name": "Facebook",
+      "synonymes": [ "FB" ],
+      "link": "https://www.facebook.com",
+      "parameters": [
+        {
+          "name": "user",
+          "prerequisite": "",
+          "description": "Go to a specific profile",
+          "urlParameter": "/profile.php?id=~PARAMETER~"
+        }
+      ]
+    },
+    {
+      "name": "Twitter",
+      "synonymes": [ "Tweet" ],
+      "link": "https://twitter.com",
+      "parameters": [
+        {
+          "name": "user",
+          "prerequisite": "",
+          "description": "Go to a specific user's profile",
+          "urlParameter": "/~PARAMETER~"
+        }
+      ]
+    },
+    {
+      "name": "Reddit",
+      "synonymes": [ "Subreddit" ],
+      "link": "https://www.reddit.com",
+      "parameters": [
+        {
+          "name": "topic",
+          "prerequisite": "",
+          "description": "Go to a specific subreddit",
+          "urlParameter": "/r/~PARAMETER~"
+        },
+        {
+          "name": "user",
+          "prerequisite": "",
+          "description": "Go to a specific user",
+          "urlParameter": "/user/~PARAMETER~"
+        }
+      ]
+    }
+  ]
+}

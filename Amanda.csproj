@@ -17,7 +17,14 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Metadata\" />
     <Folder Include="Trainings\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Metadata\sites.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>
