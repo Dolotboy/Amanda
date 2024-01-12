@@ -22,6 +22,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="Metadata\contacts.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="Metadata\sites.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

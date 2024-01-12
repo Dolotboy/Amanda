@@ -2,7 +2,7 @@
   "sites": [
     {
       "name": "YouTube",
-      "synonymes": [ "YT", "Tube" ],
+      "synonymes": [ "yt", "tube" ],
       "link": "https://www.youtube.com",
       "parameters": [
         {
@@ -21,7 +21,7 @@
           "name": "user",
           "prerequisite": "",
           "description": "Go to a specific channel",
-          "urlParameter": "/c/~PARAMETER~"
+          "urlParameter": "/@~PARAMETER~"
         },
         {
           "name": "query",
@@ -33,7 +33,7 @@
     },
     {
       "name": "Wikipedia",
-      "synonymes": [ "Wiki" ],
+      "synonymes": [ "wiki" ],
       "link": "https://fr.wikipedia.org/wiki",
       "parameters": [
         {
@@ -77,7 +77,7 @@
     },
     {
       "name": "Google",
-      "synonymes": [ "Search" ],
+      "synonymes": [ "search" ],
       "link": "https://www.google.com",
       "parameters": [
         {
@@ -90,7 +90,7 @@
     },
     {
       "name": "Facebook",
-      "synonymes": [ "FB" ],
+      "synonymes": [ "fb" ],
       "link": "https://www.facebook.com",
       "parameters": [
         {
@@ -103,7 +103,7 @@
     },
     {
       "name": "Twitter",
-      "synonymes": [ "Tweet" ],
+      "synonymes": [ "tweet" ],
       "link": "https://twitter.com",
       "parameters": [
         {
@@ -116,7 +116,7 @@
     },
     {
       "name": "Reddit",
-      "synonymes": [ "Subreddit" ],
+      "synonymes": [ "subreddit" ],
       "link": "https://www.reddit.com",
       "parameters": [
         {

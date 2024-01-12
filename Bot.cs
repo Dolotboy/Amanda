@@ -169,10 +169,10 @@ namespace Amanda
                         Console.WriteLine("Lancement du film");
                         break;
                     case "Sites:Sites":
-                        if(currentQuery.trait == "start" || currentQuery.trait == "open")
-                        {
+                        //if(currentQuery.trait == "start" || currentQuery.trait == "open")
+                        //{
                             ManageSite(entity.value);
-                        }
+                        //}
                         break;
                 }
             }
@@ -212,10 +212,12 @@ namespace Amanda
             }
         }
 
-        private void ManageSite(string siteName)
+        private async void ManageSite(string siteName)
         {
-            string jsonFilePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Metadata\\sites.json");
-            string jsonString = File.ReadAllText(jsonFilePath);
+            string[] urlParameters = { "user", "topic", "explore", "lang", "id", "time", "query" };
+
+            string sitesJsonFilePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Metadata\\sites.json");
+            string jsonString = File.ReadAllText(sitesJsonFilePath);
 
             // Parse the JSON string
             JObject jsonData = JObject.Parse(jsonString);
@@ -229,6 +231,82 @@ namespace Amanda
                     Process myProcess = new Process();
                     myProcess.StartInfo.UseShellExecute = true;
                     myProcess.StartInfo.FileName = (string)site["link"];
+
+                    if (urlParameters.Contains(currentQuery.trait))
+                    {
+                        JArray parameters = (JArray)site["parameters"];
+
+                        // Find the parameter based on the currentQuery trait
+                        JObject matchingParameter = parameters
+                            .OfType<JObject>()
+                            .FirstOrDefault(p => (string)p["name"] == currentQuery.trait);
+
+                        if (matchingParameter != null)
+                        {
+                            string urlParameter = (string)matchingParameter["urlParameter"];
+
+                            // Replace "~PARAMETER~" with the value from the first entity
+                            WitEntity firstEntityOfType = currentQuery.entities
+                                .FirstOrDefault(entity =>
+                                    entity.type == "Sites_Parameters:Sites_Parameters" ||
+                                    entity.type == "Contacts:Contacts");
+
+                            if (firstEntityOfType != null)
+                            {
+                                if (firstEntityOfType.type == "Contacts:Contacts")
+                                {
+                                    // Look for the contact in the contacts JSON
+                                    string contactsJsonFilePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Metadata\\contacts.json");
+                                    jsonString = File.ReadAllText(contactsJsonFilePath);
+                                    jsonData = JObject.Parse(jsonString);
+
+                                    JArray contacts = (JArray)jsonData["contacts"];
+                                    JObject contact = contacts
+                                        .OfType<JObject>()
+                                        .FirstOrDefault(c =>
+                                            c["firstname"].ToString().ToLower()
+                                                .Equals(firstEntityOfType.value.ToLower(), StringComparison.OrdinalIgnoreCase) ||
+                                            c["lastname"].ToString().ToLower()
+                                                .Equals(firstEntityOfType.value.ToLower(), StringComparison.OrdinalIgnoreCase) ||
+                                            (c["otherNames"] != null &&
+                                             ((JArray)c["otherNames"]).Any(on =>
+                                                 on.ToString().ToLower().Equals(firstEntityOfType.value.ToLower(), StringComparison.OrdinalIgnoreCase))));
+
+
+                                    // If contact is found, replace parameters with contact information
+                                    if (contact != null)
+                                    {
+                                        // Check if the contact has the "socialMedia" section
+                                        if (contact["socialMedia"] is JObject socialMedia)
+                                        {
+                                            foreach (var property in socialMedia.Properties())
+                                            {
+                                                var propertyName = property.Name;
+                                                if(propertyName == site["name"].ToString().ToLower())
+                                                {
+                                                    var propertyValue = (string)property.Value["id"];
+
+                                                    if (!string.IsNullOrEmpty(propertyValue))
+                                                    {
+                                                        // Replace parameters with social media information
+                                                        urlParameter = urlParameter.Replace("~PARAMETER~", propertyValue);
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                    // If not a contact, replace "~PARAMETER~" with the value
+                                    urlParameter = urlParameter.Replace("~PARAMETER~", firstEntityOfType.value);
+                                }
+                            }
+
+                            myProcess.StartInfo.FileName += urlParameter;
+                        }
+                    }
+
                     myProcess.Start();
                 }
             }
