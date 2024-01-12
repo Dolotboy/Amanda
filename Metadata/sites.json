@@ -97,7 +97,7 @@
           "name": "user",
           "prerequisite": "",
           "description": "Go to a specific profile",
-          "urlParameter": "/profile.php?id=~PARAMETER~"
+          "urlParameter": "/~PARAMETER~"
         }
       ]
     },
@@ -130,6 +130,19 @@
           "prerequisite": "",
           "description": "Go to a specific user",
           "urlParameter": "/user/~PARAMETER~"
+        }
+      ]
+    },
+    {
+      "name": "Instagram",
+      "synonymes": [ "insta" ],
+      "link": "https://www.instagram.com",
+      "parameters": [
+        {
+          "name": "user",
+          "prerequisite": "",
+          "description": "Go to a specific user",
+          "urlParameter": "/~PARAMETER~"
         }
       ]
     }
